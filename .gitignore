@@ -1,0 +1,13 @@
+# Ignore build output
+bin/
+obj/
+
+# Ignore local database
+*.db
+
+# Ignore IDE-specific files
+.vs/
+.vscode/
+
+# Ignore user-specific settings
+*.user
