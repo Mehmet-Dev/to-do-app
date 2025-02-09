@@ -17,6 +17,8 @@ namespace ToDoApp.Services
                 {
                     Title = title,
                     Description = description,
+                    Priority = priority,
+                    DueDate = dueDate,
                     IsCompleted = false,
                 });
                 _dbContext.SaveChanges();

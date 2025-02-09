@@ -1,3 +1,4 @@
+using System.Globalization;
 using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
@@ -45,7 +46,7 @@ namespace ToDoApp.Controllers
                     break;
                 default:
                     Console.Clear();
-                    TypeText("Oops! That was not an item in the menu. Let's retry!");
+                    TypeTextWithCooldown("Oops! That was not an item in the menu. Let's retry!");
                     break;
             }
 
@@ -54,7 +55,7 @@ namespace ToDoApp.Controllers
         private void RegisterMenu()
         {
             Console.Clear();
-            TypeText("Welcome! Let's register you into the database.");
+            TypeTextWithCooldown("Welcome! Let's register you into the database.");
 
             bool registerDone = false;
 
@@ -62,7 +63,7 @@ namespace ToDoApp.Controllers
 
             while (!registerDone)
             {
-                TypeText("Please write a username, \"exit\" to go back!");
+                TypeTextWithCooldown("Please write a username, \"exit\" to go back!");
 
                 string username = Console.ReadLine()!;
 
@@ -74,24 +75,24 @@ namespace ToDoApp.Controllers
                 if (username.Length > 26)
                 {
                     Console.Clear();
-                    TypeText("Whoops, that username is too long! Let's retry.");
+                    TypeTextWithCooldown("Whoops, that username is too long! Let's retry.");
                 }
                 else
                 {
                     while (true)
                     {
                         Console.Clear();
-                        TypeText("Insert a password! Minimum of 8 characters.");
+                        TypeTextWithCooldown("Insert a password! Minimum of 8 characters.");
                         string password = Console.ReadLine()!;
 
                         if (password.Length < 8)
                         {
-                            TypeText("Whoops! That password is too short...");
+                            TypeTextWithCooldown("Whoops! That password is too short...");
                         }
 
                         Console.Clear();
 
-                        TypeText($"Here's what you've put in!\nUsername: {username}\nPassword: {password}\nDo you want to register with this? y for yes, n for no!");
+                        TypeTextWithCooldown($"Here's what you've put in!\nUsername: {username}\nPassword: {password}\nDo you want to register with this? y for yes, n for no!");
                         var keyInfo = Console.ReadKey(true);
 
                         if (keyInfo.KeyChar == 'y')
@@ -100,7 +101,7 @@ namespace ToDoApp.Controllers
                             {
                                 Console.Clear();
 
-                                TypeText("You have been registered!");
+                                TypeTextWithCooldown("You have been registered!");
                                 completedRegistration = true;
                                 break;
                             }
@@ -113,7 +114,7 @@ namespace ToDoApp.Controllers
             }
 
             Console.Clear();
-            TypeText("Going back...");
+            TypeTextWithCooldown("Going back...");
         }
 
         private void LoginMenu()
@@ -129,7 +130,7 @@ namespace ToDoApp.Controllers
                 if (username == "exit")
                 {
                     Console.Clear();
-                    TypeText("Going back to main menu...");
+                    TypeTextWithCooldown("Going back to main menu...");
                     break;
                 }
 
@@ -142,13 +143,13 @@ namespace ToDoApp.Controllers
                 if (user != null)
                 {
                     Console.Clear();
-                    TypeText("You are logged in!");
+                    TypeTextWithCooldown("You are logged in!");
                     MainMenu(user);
                 }
                 else
                 {
                     Console.Clear();
-                    TypeText("Uh oh, we couldn't log you in with the provided credentials. Try again!");
+                    TypeTextWithCooldown("Uh oh, we couldn't log you in with the provided credentials. Try again!");
                 }
             }
         }
@@ -158,7 +159,7 @@ namespace ToDoApp.Controllers
             while (true)
             {
                 Console.Clear();
-                TypeText("Choose what you want to do next!\n[v] View to-do's\n[a] Add a new to-do\n[e] Exit");
+                TypeTextWithCooldown("Choose what you want to do next!\n[v] View to-do's\n[a] Add a new to-do\n[e] Exit");
 
                 var keyInfo = Console.ReadKey(true);
                 switch (keyInfo.KeyChar)
@@ -171,12 +172,12 @@ namespace ToDoApp.Controllers
                         break;
                     case 'e':
                         Console.Clear();
-                        TypeText("Thanks for using my amazing cool program wow");
+                        TypeTextWithCooldown("Thanks for using my amazing cool program wow");
                         Environment.Exit(0);
                         break;
                     default:
                         Console.Clear();
-                        TypeText("Whoops, an invalid choice. Let's try that again!");
+                        TypeTextWithCooldown("Whoops, an invalid choice. Let's try that again!");
                         break;
                 }
             }
@@ -187,64 +188,142 @@ namespace ToDoApp.Controllers
             Console.Clear();
             if (user.ToDoItems == null || user.ToDoItems.Count == 0)
             {
-                TypeText("Whoops, you don't have any items! Add some in the previous menu!");
+                TypeTextWithCooldown("Whoops, you don't have any items! Add some in the previous menu!");
                 return;
             }
             int i = 1;
             foreach (ToDoItem todo in user.ToDoItems)
             {
-                TypeText($"[{i}] {todo.Title} - {todo.Description} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")}");
+                TimeSpan diff = todo.DueDate - DateTime.Now;
+                string timeLeft = diff.TotalSeconds < 0 
+                    ? "Too late!" 
+                    : diff.Days > 0 
+                        ? $"Due in {diff.Days}d {diff.Hours}h {diff.Minutes}m" 
+                        : diff.Hours > 0 
+                            ? $"Due in {diff.Hours}h {diff.Minutes}m" 
+                            : $"Due in {diff.Minutes}m";
+                TypeText($"[{i}] {todo.Title} - {todo.Description} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")} - {timeLeft}");
             }
 
-            TypeText("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!");
-
-            if (int.TryParse(Console.ReadLine(), out int index) && index <= user.ToDoItems.Count)
+            TypeTextWithCooldown("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!\nYou can also type 'clear' to clear out all overdue items.");
+            string prompt = Console.ReadLine()!;
+            if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count)
             {
                 var todoItem = user.ToDoItems[index - 1];
 
                 Console.Clear();
-                TypeText($"Do you want to complete task \"{todoItem.Title}\"? (y/n)");
+                TypeTextWithCooldown($"Do you want to complete task \"{todoItem.Title}\"? (y/n)");
                 var keyInfo = Console.ReadKey(true);
 
-                if(keyInfo.KeyChar == 'y')
+                if (keyInfo.KeyChar == 'y')
                 {
                     _toDoController.CompleteToDoItem(user.ID, index);
                     Console.Clear();
 
-                    TypeText("To-do has been completed!");
+                    TypeTextWithCooldown("To-do has been completed!");
                 }
+            }
+            else if(prompt == "clear")
+            {
+                
             }
             else
             {
-                TypeText("Uh oh, you didn't write a valid input! Let's try that again.");
+                TypeTextWithCooldown("Going back to main menu...");
             }
         }
 
         public void AddToDo(User user)
         {
-            bool isCompleted = false;
-            while (!isCompleted)
+            string title = "";
+            string desc = "";
+            string prio = "";
+            string[] prioChoice =
+            {
+                "Low",
+                "Medium",
+                "High"
+            };
+            DateTime? dueDate = null;
+
+            Console.Clear();
+            TypeTextWithCooldown("What should be the title of your new to-do?");
+            do
+            {
+                title = Console.ReadLine()!;
+
+                if (string.IsNullOrEmpty(title))
+                {
+                    Console.Clear();
+                    TypeTextWithCooldown("Uh oh, that's an empty title! Let's try again.");
+                }
+                else break;
+            } while (true);
+
+            do
             {
                 Console.Clear();
-                TypeText("What should be the title of your new to-do?");
-                do
-                {
-                    string title = Console.ReadLine()!;
+                TypeTextWithCooldown("Add a description to your new to-do!\nDescription: ");
+                desc = Console.ReadLine()!;
 
-                    if(title == "")
+                if (string.IsNullOrEmpty(desc))
+                {
+                    TypeTextWithCooldown("An empty description... not so smart!");
+                }
+                else break;
+            } while (true);
+
+            do
+            {
+                Console.Clear();
+                TypeTextWithCooldown("Add a priority. Here are your possible choices:\n1 for low, 2 for medium and 3 for high!");
+
+                if (int.TryParse(Console.ReadLine(), out int result))
+                {
+                    if (result >= 1 && result <= 3)
                     {
-                        TypeText("Uh oh, that's an empty title! Let's try again.");
+                        prio = prioChoice[result - 1];
+                        break;
                     }
-                    break;
-                } while(true);
-
-                do
+                    else
+                    {
+                        Console.Clear();
+                        TypeTextWithCooldown("Uh oh, it was out of the range. Attempt number 2! I think...");
+                    }
+                }
+                else
                 {
-                    
-                } while(true);
-            }
+                    Console.Clear();
+                    TypeTextWithCooldown("Not good, you didn't write a valid number! Let's try again.");
+                }
+            } while (true);
+
+            do
+            {
+                Console.Clear();
+                TypeTextWithCooldown("Add a date and time to this to-do! Write in this format: dd/mm/yyyy hh:mm (with the / and : included!)\nExample: 20/02/2020 15:25");
+
+                if (DateTime.TryParseExact(Console.ReadLine()!.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+                {
+                    if (parsedDate < DateTime.Now)
+                    {
+                        Console.Clear();
+                        TypeTextWithCooldown("UH oh, that's earlier than today! Try again!");
+                        continue;
+                    }
+                    dueDate = parsedDate;
+                    break;
+                }
+                else
+                {
+                    Console.Clear();
+                    TypeTextWithCooldown("Uh oh, invalid format! Try again.");
+                }
+
+            } while (true);
             Console.Clear();
-            TypeText("The to-do has been added!");
+            _toDoController.AddToDoItem(user.ID, title, desc, prio, (DateTime)dueDate);
+            TypeTextWithCooldown("The to-do has been added!");
         }
 
 
@@ -256,6 +335,11 @@ namespace ToDoApp.Controllers
                 Thread.Sleep(delay);
             }
             Console.Write("\n");
+        }
+
+        private static void TypeTextWithCooldown(string text, int delay = 10)
+        {
+            TypeText(text, delay);
             Thread.Sleep(1000);
         }
     }
