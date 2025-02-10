@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using ToDoApp.Models;
 
@@ -63,7 +64,7 @@ namespace ToDoApp.Controllers
 
             while (!registerDone)
             {
-                TypeTextWithCooldown("Please write a username, \"exit\" to go back!");
+                TypeText("Please write a username, \"exit\" to go back!");
 
                 string username = Console.ReadLine()!;
 
@@ -82,7 +83,7 @@ namespace ToDoApp.Controllers
                     while (true)
                     {
                         Console.Clear();
-                        TypeTextWithCooldown("Insert a password! Minimum of 8 characters.");
+                        TypeText("Insert a password! Minimum of 8 characters.");
                         string password = Console.ReadLine()!;
 
                         if (password.Length < 8)
@@ -92,7 +93,7 @@ namespace ToDoApp.Controllers
 
                         Console.Clear();
 
-                        TypeTextWithCooldown($"Here's what you've put in!\nUsername: {username}\nPassword: {password}\nDo you want to register with this? y for yes, n for no!");
+                        TypeText($"Here's what you've put in!\nUsername: {username}\nPassword: {password}\nDo you want to register with this? y for yes, n for no!");
                         var keyInfo = Console.ReadKey(true);
 
                         if (keyInfo.KeyChar == 'y')
@@ -185,145 +186,109 @@ namespace ToDoApp.Controllers
 
         public void ViewToDos(User user)
         {
-            Console.Clear();
-            if (user.ToDoItems == null || user.ToDoItems.Count == 0)
+            do
             {
-                TypeTextWithCooldown("Whoops, you don't have any items! Add some in the previous menu!");
-                return;
-            }
-            int i = 1;
-            foreach (ToDoItem todo in user.ToDoItems)
-            {
-                TimeSpan diff = todo.DueDate - DateTime.Now;
-                string timeLeft = diff.TotalSeconds < 0 
-                    ? "Too late!" 
-                    : diff.Days > 0 
-                        ? $"Due in {diff.Days}d {diff.Hours}h {diff.Minutes}m" 
-                        : diff.Hours > 0 
-                            ? $"Due in {diff.Hours}h {diff.Minutes}m" 
-                            : $"Due in {diff.Minutes}m";
-                TypeText($"[{i}] {todo.Title} - {todo.Description} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")} - {timeLeft}");
-            }
-
-            TypeTextWithCooldown("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!\nYou can also type 'clear' to clear out all overdue items.");
-            string prompt = Console.ReadLine()!;
-            if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count)
-            {
-                var todoItem = user.ToDoItems[index - 1];
-
                 Console.Clear();
-                TypeTextWithCooldown($"Do you want to complete task \"{todoItem.Title}\"? (y/n)");
-                var keyInfo = Console.ReadKey(true);
-
-                if (keyInfo.KeyChar == 'y')
+                if (user.ToDoItems == null || user.ToDoItems.Count == 0)
                 {
-                    _toDoController.CompleteToDoItem(user.ID, index);
-                    Console.Clear();
-
-                    TypeTextWithCooldown("To-do has been completed!");
+                    TypeTextWithCooldown("Whoops, you don't have any items! Add some in the previous menu!");
+                    return;
                 }
-            }
-            else if(prompt == "clear")
-            {
-                
-            }
-            else
-            {
-                TypeTextWithCooldown("Going back to main menu...");
-            }
+                int i = 1;
+                foreach (ToDoItem todo in user.ToDoItems)
+                {
+                    TimeSpan diff = todo.DueDate - DateTime.Now;
+                    string timeLeft = diff.TotalSeconds < 0
+                        ? "Too late!"
+                        : diff.Days > 0
+                            ? $"Due in {diff.Days}d {diff.Hours}h {diff.Minutes}m"
+                            : diff.Hours > 0
+                                ? $"Due in {diff.Hours}h {diff.Minutes}m"
+                                : $"Due in {diff.Minutes}m";
+                    TypeText($"[{i}] {todo.Title} - {todo.Description} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")} - {timeLeft}");
+                    i++;
+                }
+
+                TypeText("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!\nYou can also type 'clear' to clear out all overdue items, and update to edit a to-do.");
+                string prompt = Console.ReadLine()!;
+
+                if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count)
+                {
+                    var todoItem = user.ToDoItems[index - 1];
+
+                    Console.Clear();
+                    TypeTextWithCooldown($"Do you want to complete task \"{todoItem.Title}\"? (y/n)");
+                    var keyInfo = Console.ReadKey(true);
+
+                    if (keyInfo.KeyChar == 'y')
+                    {
+                        _toDoController.CompleteToDoItem(user.ID, index);
+                        Console.Clear();
+
+                        TypeTextWithCooldown("To-do has been completed!");
+                    }
+                }
+                else
+                {
+                    switch (prompt)
+                    {
+                        case "clear":
+                            _toDoController.RemoveCompletedItems(user.ID);
+                            TypeTextWithCooldown("Completed items have been removed!");
+                            break;
+                        case "update":
+                            Process.Start(new ProcessStartInfo { FileName = "https://www.youtube.com/watch?v=dQw4w9WgXcQ", UseShellExecute = true, });
+                            break;
+                        default:
+                            TypeTextWithCooldown("Going back to main menu...");
+                            return;
+                    }
+                }
+            } while (true);
         }
 
         public void AddToDo(User user)
         {
-            string title = "";
-            string desc = "";
-            string prio = "";
-            string[] prioChoice =
-            {
-                "Low",
-                "Medium",
-                "High"
-            };
-            DateTime? dueDate = null;
-
             Console.Clear();
-            TypeTextWithCooldown("What should be the title of your new to-do?");
-            do
-            {
-                title = Console.ReadLine()!;
+            TypeTextWithCooldown("Updating a to-do item... Leave fields empty to keep existing values.");
 
-                if (string.IsNullOrEmpty(title))
-                {
-                    Console.Clear();
-                    TypeTextWithCooldown("Uh oh, that's an empty title! Let's try again.");
-                }
-                else break;
-            } while (true);
+            string title = ToDoInputHelper.GetTitle();
+            string desc = ToDoInputHelper.GetDescription();
+            string prio = ToDoInputHelper.GetPriority();
+            DateTime dueDate = ToDoInputHelper.GetDueDate();
 
-            do
-            {
-                Console.Clear();
-                TypeTextWithCooldown("Add a description to your new to-do!\nDescription: ");
-                desc = Console.ReadLine()!;
-
-                if (string.IsNullOrEmpty(desc))
-                {
-                    TypeTextWithCooldown("An empty description... not so smart!");
-                }
-                else break;
-            } while (true);
-
-            do
-            {
-                Console.Clear();
-                TypeTextWithCooldown("Add a priority. Here are your possible choices:\n1 for low, 2 for medium and 3 for high!");
-
-                if (int.TryParse(Console.ReadLine(), out int result))
-                {
-                    if (result >= 1 && result <= 3)
-                    {
-                        prio = prioChoice[result - 1];
-                        break;
-                    }
-                    else
-                    {
-                        Console.Clear();
-                        TypeTextWithCooldown("Uh oh, it was out of the range. Attempt number 2! I think...");
-                    }
-                }
-                else
-                {
-                    Console.Clear();
-                    TypeTextWithCooldown("Not good, you didn't write a valid number! Let's try again.");
-                }
-            } while (true);
-
-            do
-            {
-                Console.Clear();
-                TypeTextWithCooldown("Add a date and time to this to-do! Write in this format: dd/mm/yyyy hh:mm (with the / and : included!)\nExample: 20/02/2020 15:25");
-
-                if (DateTime.TryParseExact(Console.ReadLine()!.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
-                {
-                    if (parsedDate < DateTime.Now)
-                    {
-                        Console.Clear();
-                        TypeTextWithCooldown("UH oh, that's earlier than today! Try again!");
-                        continue;
-                    }
-                    dueDate = parsedDate;
-                    break;
-                }
-                else
-                {
-                    Console.Clear();
-                    TypeTextWithCooldown("Uh oh, invalid format! Try again.");
-                }
-
-            } while (true);
             Console.Clear();
             _toDoController.AddToDoItem(user.ID, title, desc, prio, (DateTime)dueDate);
             TypeTextWithCooldown("The to-do has been added!");
+        }
+
+        public static void UpdateToDo(int userId, ToDoItem toDo, int index)
+        {
+            string[] props = ["Name", "Description", "Priority", "Due date"];
+            
+            
+            do
+            {
+                TypeText("You can change the following:");
+                int i = 1;
+                foreach (var property in props)
+                {
+                    TypeText($"[{i}]: {property}");
+                    i++;
+                }
+
+                TypeText("Please choose with the index, type 'q' to quit.");
+                string prompt = Console.ReadLine()!;
+
+                if (string.Compare(prompt, "q", StringComparison.OrdinalIgnoreCase) == 0) return;
+
+                if (int.TryParse(prompt, out int prop))
+                {
+
+                }
+                else TypeTextWithCooldown("Invalid input!");
+
+            } while (true);
         }
 
 

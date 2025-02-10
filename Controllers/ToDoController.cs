@@ -3,6 +3,7 @@ using ToDoApp.Services;
 
 namespace ToDoApp.Controllers
 {
+    // I will not be adding any comments on Controller classes, because these are mostly self-explanatory. They just call functions from Service classes.
     public class ToDoController
     {
         private readonly ToDoService _service;
@@ -11,6 +12,7 @@ namespace ToDoApp.Controllers
 
         public void AddToDoItem(int userId, string title, string description, string priority, DateTime dueDate) => _service.AddToDoItem(userId, title, description, priority, dueDate);
         public void CompleteToDoItem(int userId, int index) => _service.CompleteToDoItem(userId, index);
+        public void RemoveCompletedItems(int userId) => _service.RemoveCompletedItems(userId);
 
         public List<ToDoItem> GetToDoItems(int userId) => _service.GetToDoItems(userId);
     }
