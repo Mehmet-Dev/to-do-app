@@ -64,5 +64,12 @@ namespace ToDoApp.Services
             }
             _dbContext.SaveChanges();
         }
+
+        public void UpdateToDo(int userId, int index, string? title, string? desc, string prio, DateTime dueDate)
+        {
+            var user = _dbContext.Users.Find(userId);
+            
+            var todo = user.ToDoItems[index - 1];
+        }
     }
 }

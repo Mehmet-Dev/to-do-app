@@ -250,23 +250,35 @@ namespace ToDoApp.Controllers
         public void AddToDo(User user)
         {
             Console.Clear();
-            TypeTextWithCooldown("Updating a to-do item... Leave fields empty to keep existing values.");
 
-            string title = ToDoInputHelper.GetTitle();
-            string desc = ToDoInputHelper.GetDescription();
-            string prio = ToDoInputHelper.GetPriority();
-            DateTime dueDate = ToDoInputHelper.GetDueDate();
+            try
+            {
+                string title = ToDoInputHelper.GetTitle();
+                string desc = ToDoInputHelper.GetDescription();
+                string prio = ToDoInputHelper.GetPriority();
+                DateTime? dueDate = ToDoInputHelper.GetDueDate();
 
-            Console.Clear();
-            _toDoController.AddToDoItem(user.ID, title, desc, prio, (DateTime)dueDate);
-            TypeTextWithCooldown("The to-do has been added!");
+                Console.Clear();
+                _toDoController.AddToDoItem(user.ID, title, desc, prio, (DateTime)dueDate);
+                TypeTextWithCooldown("The to-do has been added!");
+            }
+            catch (OperationCanceledException ex)
+            {
+                TypeTextWithCooldown(ex.Message);  // Inform the user about cancellation
+            }
         }
+
 
         public static void UpdateToDo(int userId, ToDoItem toDo, int index)
         {
-            string[] props = ["Name", "Description", "Priority", "Due date"];
-            
-            
+            string[] props = new string[] { "Name", "Description", "Priority", "Due date" };
+            Func<object?>[] updateActions =
+                    [
+                        () => ToDoInputHelper.GetTitle(),
+                        () => ToDoInputHelper.GetDescription(),
+                        () => ToDoInputHelper.GetPriority(),
+                        () => ToDoInputHelper.GetDueDate(),
+                    ];
             do
             {
                 TypeText("You can change the following:");
@@ -282,9 +294,35 @@ namespace ToDoApp.Controllers
 
                 if (string.Compare(prompt, "q", StringComparison.OrdinalIgnoreCase) == 0) return;
 
-                if (int.TryParse(prompt, out int prop))
+                if (int.TryParse(prompt, out int prop) && prop >= 1 && prop <= props.Length)
                 {
+                    try
+                    {
+                        object newValue = updateActions[prop - 1]();
 
+                        switch (prop)
+                        {
+                            case 1:
+                                toDo.Title = newValue.ToString();
+                                break;
+                            case 2:
+                                toDo.Description = newValue.ToString();
+                                break;
+                            case 3:
+                                toDo.Priority = newValue.ToString();
+                                break;
+                            case 4:
+                                toDo.DueDate = (DateTime)newValue;
+                                break;
+                        }
+
+                        _toDoController.Updat
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        Console.Clear();
+                        TypeTextWithCooldown(ex.Message);
+                    }
                 }
                 else TypeTextWithCooldown("Invalid input!");
 

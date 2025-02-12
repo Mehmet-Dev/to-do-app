@@ -4,14 +4,17 @@ public class ToDoInputHelper
 {
     private static readonly string[] PrioChoices = { "Low", "Medium", "High" };
 
-    public static string GetTitle()
+    public static string? GetTitle()
     {
         string title;
         do
         {
             Console.Clear();
-            TypeTextWithCooldown("What should be the title of your new to-do?");
+            TypeTextWithCooldown("What should be the title of your new to-do? Q to exit.");
             title = Console.ReadLine()!;
+
+            if (CheckForQuit(title))
+                throw new OperationCanceledException("Cancelled, you chose to quit!");
 
             if (string.IsNullOrEmpty(title))
             {
@@ -26,7 +29,7 @@ public class ToDoInputHelper
         return title;
     }
 
-    public static string GetDescription()
+    public static string? GetDescription()
     {
         string desc;
         do
@@ -34,6 +37,9 @@ public class ToDoInputHelper
             Console.Clear();
             TypeTextWithCooldown("Add a description to your new to-do!\nDescription: ");
             desc = Console.ReadLine()!;
+
+            if(CheckForQuit(desc))
+                throw new OperationCanceledException("Cancelled, you chose to quit!");
 
             if (string.IsNullOrEmpty(desc))
             {
@@ -48,7 +54,7 @@ public class ToDoInputHelper
         return desc;
     }
 
-    public static string GetPriority()
+    public static string? GetPriority()
     {
         string prio;
         do
@@ -56,7 +62,11 @@ public class ToDoInputHelper
             Console.Clear();
             TypeTextWithCooldown("Add a priority. Here are your possible choices:\n1 for low, 2 for medium and 3 for high!");
 
-            if (int.TryParse(Console.ReadLine(), out int result) && result >= 1 && result <= 3)
+            string prompt = Console.ReadLine()!;
+            if(CheckForQuit(prompt))
+                throw new OperationCanceledException("Cancelled, you chose to quit!");
+
+            if (int.TryParse(prompt, out int result) && result >= 1 && result <= 3)
             {
                 prio = PrioChoices[result - 1];
                 break;
@@ -70,7 +80,7 @@ public class ToDoInputHelper
         return prio;
     }
 
-    public static DateTime GetDueDate()
+    public static DateTime? GetDueDate()
     {
         DateTime dueDate;
         do
@@ -78,7 +88,11 @@ public class ToDoInputHelper
             Console.Clear();
             TypeTextWithCooldown("Add a date and time to this to-do! Write in this format: dd/mm/yyyy hh:mm\nExample: 20/02/2020 15:25");
 
-            if (DateTime.TryParseExact(Console.ReadLine()!.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dueDate))
+            string prompt = Console.ReadLine()!;
+            if(CheckForQuit(prompt))
+                throw new OperationCanceledException("Cancelled, you chose to quit!");
+
+            if (DateTime.TryParseExact(prompt.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dueDate))
             {
                 if (dueDate < DateTime.Now)
                 {
@@ -97,6 +111,17 @@ public class ToDoInputHelper
 
         return dueDate;
     }
+
+    private static bool CheckForQuit(string input)
+    {
+        if(string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
+        {
+            TypeTextWithCooldown("Quitting...");
+            return true;
+        }
+        return false;
+    }
+
 
     private static void TypeTextWithCooldown(string text)
     {
