@@ -55,12 +55,12 @@ namespace ToDoApp.Services
         /// Removes all completed to do items of a user.
         /// </summary>
         /// <param name="userId">Index of the user... how many more times do I have to write this?</param>
-        public void RemoveCompletedItems(int userId)
+        public void RemoveCompletedAndOverdueItems(int userId)
         {
             var user = _dbContext.Users.Find(userId);
             for(int i = 0; i < user.ToDoItems.Count; i++)
             {
-                if(user.ToDoItems[i].IsCompleted) user?.ToDoItems.RemoveAt(i);
+                if(user.ToDoItems[i].IsCompleted || user.ToDoItems[i].DueDate < DateTime.Now) user?.ToDoItems.RemoveAt(i);
             }
             _dbContext.SaveChanges();
         }

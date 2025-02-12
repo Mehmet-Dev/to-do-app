@@ -1,6 +1,6 @@
-using System.Diagnostics;
-using System.Globalization;
 using ToDoApp.Models;
+using ToDoApp.Helpers;
+using static ToDoApp.Helpers.TypeTextHelper;
 
 namespace ToDoApp.Controllers
 {
@@ -28,7 +28,7 @@ namespace ToDoApp.Controllers
         private void InitialMenu()
         {
             Console.Clear();
-            TypeText("Welcome to your to-do app! Please choose an option.");
+            TypeTextHelper.TypeText("Welcome to your to-do app! Please choose an option.");
             TypeText("[r] Register user\n[l] Login user\n[e] Exit");
 
             var keyInfo = Console.ReadKey(true);
@@ -176,6 +176,8 @@ namespace ToDoApp.Controllers
                         TypeTextWithCooldown("Thanks for using my amazing cool program wow");
                         Environment.Exit(0);
                         break;
+                    case 'u':
+                        break;
                     default:
                         Console.Clear();
                         TypeTextWithCooldown("Whoops, an invalid choice. Let's try that again!");
@@ -212,7 +214,7 @@ namespace ToDoApp.Controllers
                 TypeText("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!\nYou can also type 'clear' to clear out all overdue items, and update to edit a to-do.");
                 string prompt = Console.ReadLine()!;
 
-                if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count)
+                if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count && index >= 0)
                 {
                     var todoItem = user.ToDoItems[index - 1];
 
@@ -233,11 +235,16 @@ namespace ToDoApp.Controllers
                     switch (prompt)
                     {
                         case "clear":
-                            _toDoController.RemoveCompletedItems(user.ID);
+                            _toDoController.RemoveCompletedAndOverdueItems(user.ID);
                             TypeTextWithCooldown("Completed items have been removed!");
                             break;
                         case "update":
-                            Process.Start(new ProcessStartInfo { FileName = "https://www.youtube.com/watch?v=dQw4w9WgXcQ", UseShellExecute = true, });
+                            TypeTextWithCooldown("Which to-do do you want to edit?");
+                            if(int.TryParse(Console.ReadLine(), out int todo) && todo <= user.ToDoItems.Count && index >= 0)
+                            {
+                                UpdateToDo(user.ID, user.ToDoItems[todo - 1], todo);
+                            }
+
                             break;
                         default:
                             TypeTextWithCooldown("Going back to main menu...");
@@ -269,9 +276,10 @@ namespace ToDoApp.Controllers
         }
 
 
-        public static void UpdateToDo(int userId, ToDoItem toDo, int index)
+        public void UpdateToDo(int userId, ToDoItem toDo, int index)
         {
-            string[] props = new string[] { "Name", "Description", "Priority", "Due date" };
+            Console.Clear();
+            string[] props = new string[] { "Title", "Description", "Priority", "DueDate" };
             Func<object?>[] updateActions =
                     [
                         () => ToDoInputHelper.GetTitle(),
@@ -285,7 +293,10 @@ namespace ToDoApp.Controllers
                 int i = 1;
                 foreach (var property in props)
                 {
-                    TypeText($"[{i}]: {property}");
+                        var propertyInfo = typeof(ToDoItem).GetProperty(property);
+                        var currentValue = propertyInfo?.GetValue(toDo)?.ToString() ?? "N/A";
+
+                    TypeText($"[{i}]: {property}, Current value: {currentValue}");
                     i++;
                 }
 
@@ -316,9 +327,12 @@ namespace ToDoApp.Controllers
                                 break;
                         }
 
-                        _toDoController.Updat
+                        _toDoController.UpdateToDo(userId, index, toDo.Title, toDo.Description, toDo.Priority, toDo.DueDate);
+                        Console.Clear();
+                        TypeTextWithCooldown("To do has been updated!");
+                        return;
                     }
-                    catch (OperationCanceledException ex)
+                    catch (UserOperationCanceledException ex)
                     {
                         Console.Clear();
                         TypeTextWithCooldown(ex.Message);
@@ -327,23 +341,6 @@ namespace ToDoApp.Controllers
                 else TypeTextWithCooldown("Invalid input!");
 
             } while (true);
-        }
-
-
-        private static void TypeText(string text, int delay = 10)
-        {
-            foreach (char c in text)
-            {
-                Console.Write(c);
-                Thread.Sleep(delay);
-            }
-            Console.Write("\n");
-        }
-
-        private static void TypeTextWithCooldown(string text, int delay = 10)
-        {
-            TypeText(text, delay);
-            Thread.Sleep(1000);
         }
     }
 }

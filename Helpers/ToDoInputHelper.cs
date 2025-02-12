@@ -1,4 +1,6 @@
+namespace ToDoApp.Helpers;
 using System.Globalization;
+using static TypeTextHelper;
 
 public class ToDoInputHelper
 {
@@ -14,7 +16,7 @@ public class ToDoInputHelper
             title = Console.ReadLine()!;
 
             if (CheckForQuit(title))
-                throw new OperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
 
             if (string.IsNullOrEmpty(title))
             {
@@ -39,7 +41,7 @@ public class ToDoInputHelper
             desc = Console.ReadLine()!;
 
             if(CheckForQuit(desc))
-                throw new OperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
 
             if (string.IsNullOrEmpty(desc))
             {
@@ -64,7 +66,7 @@ public class ToDoInputHelper
 
             string prompt = Console.ReadLine()!;
             if(CheckForQuit(prompt))
-                throw new OperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
 
             if (int.TryParse(prompt, out int result) && result >= 1 && result <= 3)
             {
@@ -90,7 +92,7 @@ public class ToDoInputHelper
 
             string prompt = Console.ReadLine()!;
             if(CheckForQuit(prompt))
-                throw new OperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
 
             if (DateTime.TryParseExact(prompt.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dueDate))
             {
@@ -123,9 +125,13 @@ public class ToDoInputHelper
     }
 
 
-    private static void TypeTextWithCooldown(string text)
+    private static void TypeText(string text, int delay = 10)
     {
-        Console.WriteLine(text);
-        System.Threading.Thread.Sleep(1000); // Simulating a cooldown
+        foreach (char c in text)
+        {
+            Console.Write(c);
+            Thread.Sleep(delay);
+        }
+        Console.Write("\n");
     }
 }

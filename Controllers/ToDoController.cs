@@ -12,7 +12,7 @@ namespace ToDoApp.Controllers
 
         public void AddToDoItem(int userId, string title, string description, string priority, DateTime dueDate) => _service.AddToDoItem(userId, title, description, priority, dueDate);
         public void CompleteToDoItem(int userId, int index) => _service.CompleteToDoItem(userId, index);
-        public void RemoveCompletedItems(int userId) => _service.RemoveCompletedItems(userId);
+        public void RemoveCompletedAndOverdueItems(int userId) => _service.RemoveCompletedAndOverdueItems(userId);
         public void UpdateToDo(int userId, int index, string title, string description, string priority, DateTime dueDate) => _service.UpdateToDo(userId, index, title, description, priority, dueDate);       
 
         public List<ToDoItem> GetToDoItems(int userId) => _service.GetToDoItems(userId);
