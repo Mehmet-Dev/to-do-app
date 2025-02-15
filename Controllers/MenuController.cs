@@ -163,7 +163,7 @@ namespace ToDoApp.Controllers
                 TypeTextWithCooldown("Choose what you want to do next!\n[v] View to-do's\n[a] Add a new to-do\n[e] Exit");
 
                 var keyInfo = Console.ReadKey(true);
-                switch (keyInfo.KeyChar)
+                switch (char.ToLower(keyInfo.KeyChar))
                 {
                     case 'v':
                         ViewToDos(user);
@@ -232,7 +232,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    switch (prompt)
+                    switch (prompt.ToLower())
                     {
                         case "clear":
                             _toDoController.RemoveCompletedAndOverdueItems(user.ID);
@@ -269,7 +269,7 @@ namespace ToDoApp.Controllers
                 _toDoController.AddToDoItem(user.ID, title, desc, prio, (DateTime)dueDate);
                 TypeTextWithCooldown("The to-do has been added!");
             }
-            catch (OperationCanceledException ex)
+            catch (UserOperationCanceledException ex)
             {
                 TypeTextWithCooldown(ex.Message);  // Inform the user about cancellation
             }

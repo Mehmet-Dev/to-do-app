@@ -11,3 +11,4 @@ obj/
 
 # Ignore user-specific settings
 *.user
+*.py

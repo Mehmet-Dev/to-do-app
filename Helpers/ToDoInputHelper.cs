@@ -12,11 +12,11 @@ public class ToDoInputHelper
         do
         {
             Console.Clear();
-            TypeTextWithCooldown("What should be the title of your new to-do? Q to exit.");
+            TypeText("What should be the title of your new to-do? Q to exit.");
             title = Console.ReadLine()!;
 
             if (CheckForQuit(title))
-                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Quitting...");
 
             if (string.IsNullOrEmpty(title))
             {
@@ -37,11 +37,11 @@ public class ToDoInputHelper
         do
         {
             Console.Clear();
-            TypeTextWithCooldown("Add a description to your new to-do!\nDescription: ");
+            TypeText("Add a description to your new to-do!\nDescription: ");
             desc = Console.ReadLine()!;
 
             if(CheckForQuit(desc))
-                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Quitting...");
 
             if (string.IsNullOrEmpty(desc))
             {
@@ -62,11 +62,11 @@ public class ToDoInputHelper
         do
         {
             Console.Clear();
-            TypeTextWithCooldown("Add a priority. Here are your possible choices:\n1 for low, 2 for medium and 3 for high!");
+            TypeText("Add a priority. Here are your possible choices:\n1 for low, 2 for medium and 3 for high!");
 
             string prompt = Console.ReadLine()!;
             if(CheckForQuit(prompt))
-                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Quitting...");
 
             if (int.TryParse(prompt, out int result) && result >= 1 && result <= 3)
             {
@@ -88,11 +88,11 @@ public class ToDoInputHelper
         do
         {
             Console.Clear();
-            TypeTextWithCooldown("Add a date and time to this to-do! Write in this format: dd/mm/yyyy hh:mm\nExample: 20/02/2020 15:25");
+            TypeText("Add a date and time to this to-do! Write in this format: dd/mm/yyyy hh:mm\nExample: 20/02/2020 15:25");
 
             string prompt = Console.ReadLine()!;
             if(CheckForQuit(prompt))
-                throw new UserOperationCanceledException("Cancelled, you chose to quit!");
+                throw new UserOperationCanceledException("Quitting...");
 
             if (DateTime.TryParseExact(prompt.Trim(), "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dueDate))
             {
@@ -118,7 +118,6 @@ public class ToDoInputHelper
     {
         if(string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
         {
-            TypeTextWithCooldown("Quitting...");
             return true;
         }
         return false;
