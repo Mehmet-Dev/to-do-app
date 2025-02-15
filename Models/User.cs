@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+// The user class used by AppDbContext.
+// The to-do's are saved in JSON format in the database.
 namespace ToDoApp.Models
 {
     public class User

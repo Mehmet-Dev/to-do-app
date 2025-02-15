@@ -1,6 +1,7 @@
 using ToDoApp.Models;
 using System.Linq;
 
+// The authentication service, only used to register and log a user in.
 namespace ToDoApp.Services
 {
     public class AuthService

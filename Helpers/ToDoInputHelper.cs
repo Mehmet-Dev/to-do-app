@@ -2,6 +2,9 @@ namespace ToDoApp.Helpers;
 using System.Globalization;
 using static TypeTextHelper;
 
+// The all-mighty ToDoInputHelper. I wanted to be able to re-use a lot of my code instead of writing repetitive code, so I made this class.
+// At any given moment, during execution of any method in here, when a user inputs a "q", it throws a UserOperationCanceledException.
+// In every instance where this class is used, it's wrapped in a try-catch, that'll catch the error safely and return normal execution.
 public class ToDoInputHelper
 {
     private static readonly string[] PrioChoices = { "Low", "Medium", "High" };

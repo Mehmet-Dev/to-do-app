@@ -2,11 +2,14 @@ using ToDoApp.Models;
 using ToDoApp.Helpers;
 using static ToDoApp.Helpers.TypeTextHelper;
 
+//This is the main part of the code where most of the magic happens, the main loop if you may.
+//In here, all parts of code interact with each other, from controllers to services, etc.
 namespace ToDoApp.Controllers
 {
     public class MenuController
     {
-        private readonly UserController _userController;
+        //This part is mostly self-explanatory.
+        private readonly UserController _userController; 
         private readonly ToDoController _toDoController;
 
         public MenuController(UserController userController, ToDoController toDoController)
@@ -24,7 +27,9 @@ namespace ToDoApp.Controllers
                 InitialMenu();
             }
         }
-
+        /// <summary>
+        /// The initial menu, in this menu you can log-in, register and essentially, exit.
+        /// </summary>
         private void InitialMenu()
         {
             Console.Clear();
@@ -53,6 +58,10 @@ namespace ToDoApp.Controllers
 
         }
 
+        /// <summary>
+        /// This is the register menu so you can register to the application.
+        /// Essentially, multiple users can use the application in one device... It uses a local database.
+        /// </summary>
         private void RegisterMenu()
         {
             Console.Clear();
@@ -64,6 +73,7 @@ namespace ToDoApp.Controllers
 
             while (!registerDone)
             {
+                Console.Clear();
                 TypeText("Please write a username, \"exit\" to go back!");
 
                 string username = Console.ReadLine()!;
@@ -73,7 +83,7 @@ namespace ToDoApp.Controllers
                     break;
                 }
 
-                if (username.Length > 26)
+                if (username.Length > 26) // Most of the code here is just input validation.
                 {
                     Console.Clear();
                     TypeTextWithCooldown("Whoops, that username is too long! Let's retry.");
@@ -89,6 +99,7 @@ namespace ToDoApp.Controllers
                         if (password.Length < 8)
                         {
                             TypeTextWithCooldown("Whoops! That password is too short...");
+                            break;
                         }
 
                         Console.Clear();
@@ -106,6 +117,12 @@ namespace ToDoApp.Controllers
                                 completedRegistration = true;
                                 break;
                             }
+                            else
+                            {
+                                Console.Clear();
+                                TypeTextWithCooldown("Turns out someone with the same username is already registered... Try again.");
+                                break;
+                            }
                         }
                         else break;
                     }
@@ -118,6 +135,9 @@ namespace ToDoApp.Controllers
             TypeTextWithCooldown("Going back...");
         }
 
+        /// <summary>
+        /// The log-in menu. They log-in.
+        /// </summary>
         private void LoginMenu()
         {
             bool loginComplete = false;
@@ -155,7 +175,11 @@ namespace ToDoApp.Controllers
             }
         }
 
-        public void MainMenu(User user)
+        /// <summary>
+        /// The main menu where most of the functionality resides. Users can view their to-do's, add new ones, and exit.
+        /// </summary>
+        /// <param name="user">The user that's logged in.</param>
+        public void MainMenu(User user) 
         {
             while (true)
             {
@@ -186,6 +210,10 @@ namespace ToDoApp.Controllers
             }
         }
 
+        /// <summary>
+        /// You can view your to-do's here.
+        /// </summary>
+        /// <param name="user">The user that's logged in.</param>
         public void ViewToDos(User user)
         {
             do
@@ -206,20 +234,21 @@ namespace ToDoApp.Controllers
                             ? $"Due in {diff.Days}d {diff.Hours}h {diff.Minutes}m"
                             : diff.Hours > 0
                                 ? $"Due in {diff.Hours}h {diff.Minutes}m"
-                                : $"Due in {diff.Minutes}m";
-                    TypeText($"[{i}] {todo.Title} - {todo.Description} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")} - {timeLeft}");
+                                : $"Due in {diff.Minutes}m"; // This right here is a bunch of other logic that determines the differences in days, hours and minutes.
+                    TypeText($"[{i}] {todo.Title} - {(todo.IsCompleted ? "Completed!" : "Yet to be completed.")} - {timeLeft}");
                     i++;
                 }
 
                 TypeText("\nType in the number of the task you want to set as completed and press enter, or else, go back to the previous menu!\nYou can also type 'clear' to clear out all overdue items, and update to edit a to-do.");
                 string prompt = Console.ReadLine()!;
 
+                // This part of the code checks whether they put in a number, if not it's most likely a character.
                 if (int.TryParse(prompt, out int index) && index <= user.ToDoItems.Count && index >= 0)
                 {
                     var todoItem = user.ToDoItems[index - 1];
 
                     Console.Clear();
-                    TypeTextWithCooldown($"Do you want to complete task \"{todoItem.Title}\"? (y/n)");
+                    TypeText($"{todoItem}\nDo you want to set this as completed? (y/n)");
                     var keyInfo = Console.ReadKey(true);
 
                     if (keyInfo.KeyChar == 'y')
@@ -234,19 +263,18 @@ namespace ToDoApp.Controllers
                 {
                     switch (prompt.ToLower())
                     {
-                        case "clear":
+                        case "clear": // Clearing overdue and completed items
                             _toDoController.RemoveCompletedAndOverdueItems(user.ID);
-                            TypeTextWithCooldown("Completed items have been removed!");
+                            TypeTextWithCooldown("Completed (and overdue) items have been removed!");
                             break;
-                        case "update":
+                        case "update": // Updating a to-do
                             TypeTextWithCooldown("Which to-do do you want to edit?");
                             if(int.TryParse(Console.ReadLine(), out int todo) && todo <= user.ToDoItems.Count && index >= 0)
                             {
                                 UpdateToDo(user.ID, user.ToDoItems[todo - 1], todo);
                             }
-
                             break;
-                        default:
+                        default: //If they put anything else in, just send them back to the main menu.
                             TypeTextWithCooldown("Going back to main menu...");
                             return;
                     }
@@ -254,11 +282,15 @@ namespace ToDoApp.Controllers
             } while (true);
         }
 
+        /// <summary>
+        /// Part of the code that adds a new to do.
+        /// </summary>
+        /// <param name="user">The logged in user.</param>
         public void AddToDo(User user)
         {
             Console.Clear();
 
-            try
+            try // Most of the code is handled in the ToDoInputHelper class. If a user exits at any part of the code, it returns a UserOperationCanceledException, the try-catch catches it and just assumes to go back to the main menu.
             {
                 string title = ToDoInputHelper.GetTitle();
                 string desc = ToDoInputHelper.GetDescription();
@@ -275,10 +307,17 @@ namespace ToDoApp.Controllers
             }
         }
 
-
+        /// <summary>
+        /// This updates a given to-do.
+        /// </summary>
+        /// <param name="userId">The user's id.</param>
+        /// <param name="toDo">The desired to-do to be updated.</param>
+        /// <param name="index">The index of the to-do.</param>
         public void UpdateToDo(int userId, ToDoItem toDo, int index)
         {
             Console.Clear();
+            //I don't know if it's obvious, but I like having short code. So I tried to make this as tiny as possible trying to use complex ways. I suppose I managed.
+            //Again, it's mostly just handled in ToDoInputHelper class.
             string[] props = new string[] { "Title", "Description", "Priority", "DueDate" };
             Func<object?>[] updateActions =
                     [
@@ -291,7 +330,7 @@ namespace ToDoApp.Controllers
             {
                 TypeText("You can change the following:");
                 int i = 1;
-                foreach (var property in props)
+                foreach (var property in props) // This foreach loop displays what the user can change, and their current values next to it.
                 {
                         var propertyInfo = typeof(ToDoItem).GetProperty(property);
                         var currentValue = propertyInfo?.GetValue(toDo)?.ToString() ?? "N/A";
@@ -303,11 +342,11 @@ namespace ToDoApp.Controllers
                 TypeText("Please choose with the index, type 'q' to quit.");
                 string prompt = Console.ReadLine()!;
 
-                if (string.Compare(prompt, "q", StringComparison.OrdinalIgnoreCase) == 0) return;
+                if (string.Compare(prompt, "q", StringComparison.OrdinalIgnoreCase) == 0) return; // Quitting, very simple.
 
                 if (int.TryParse(prompt, out int prop) && prop >= 1 && prop <= props.Length)
                 {
-                    try
+                    try // Again, in any case if they desire to quit, it throws a special exception, the try-catch catches it and they go back to the previous menu. Smart, right?
                     {
                         object newValue = updateActions[prop - 1]();
 

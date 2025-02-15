@@ -1,5 +1,7 @@
 using ToDoApp.Models;
 
+
+// To do service. Handles all of the changes in the database whether it comes to adding a new to do or updating one. Plainly simple.
 namespace ToDoApp.Services
 {
     public class ToDoService
@@ -8,6 +10,14 @@ namespace ToDoApp.Services
 
         public ToDoService(AppDbContext context) => _dbContext = context;
 
+        /// <summary>
+        /// Adds a new to-do.
+        /// </summary>
+        /// <param name="userId">User ID of the logged in person.</param>
+        /// <param name="title">Title of the to-do.</param>
+        /// <param name="description">Description of the to-do.</param>
+        /// <param name="priority">Priority level of the to-do (can be Low, Medium or high).</param>
+        /// <param name="dueDate">The due date of the to-do.</param>
         public void AddToDoItem(int userId, string title, string description, string priority, DateTime dueDate)
         {
             var user = _dbContext.Users.Find(userId);
@@ -65,6 +75,14 @@ namespace ToDoApp.Services
             _dbContext.SaveChanges();
         }
 
+        /// <summary>
+        /// Updates a to do.
+        /// </summary>
+        /// <param name="userId">User ID of the logged in person.</param>
+        /// <param name="title">Title of the to-do.</param>
+        /// <param name="desc">Description of the to-do.</param>
+        /// <param name="prio">Priority level of the to-do (can be Low, Medium or high).</param>
+        /// <param name="dueDate">The due date of the to-do.</param>
         public void UpdateToDo(int userId, int index, string? title, string? desc, string prio, DateTime dueDate)
         {
             var user = _dbContext.Users.Find(userId);

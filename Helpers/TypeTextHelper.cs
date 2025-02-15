@@ -1,5 +1,6 @@
 namespace ToDoApp.Helpers;
 
+// Stupid TypeTextHelper. It's just fancy Console.WriteLine.
 public static class TypeTextHelper
 {
     public static void TypeText(string text, int delay = 10)
