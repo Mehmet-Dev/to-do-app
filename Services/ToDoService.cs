@@ -88,6 +88,21 @@ namespace ToDoApp.Services
             var user = _dbContext.Users.Find(userId);
             
             var todo = user.ToDoItems[index - 1];
+
+            todo.Title = title;
+            todo.Description = desc;
+            todo.Priority = prio;
+            todo.DueDate = dueDate;
+
+            user.ToDoItems[index - 1] = todo;
+            _dbContext.SaveChanges();
+        }
+
+        public void DeleteToDo(int userId, int index)
+        {
+            var user = _dbContext.Users.Find(userId);
+
+            user.ToDoItems.RemoveAt(index - 1);
         }
     }
 }

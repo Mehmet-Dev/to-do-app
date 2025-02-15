@@ -1,6 +1,7 @@
 using ToDoApp.Models;
 using ToDoApp.Helpers;
 using static ToDoApp.Helpers.TypeTextHelper;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 //This is the main part of the code where most of the magic happens, the main loop if you may.
 //In here, all parts of code interact with each other, from controllers to services, etc.
@@ -273,6 +274,18 @@ namespace ToDoApp.Controllers
                             {
                                 UpdateToDo(user.ID, user.ToDoItems[todo - 1], todo);
                             }
+                            else
+                                TypeText("Well, didn't find an item with that number. Try again!");
+                            break;
+                        case "delete":
+                            TypeText("Which to-do do you want to delete?");
+                            if(int.TryParse(Console.ReadLine(), out int to_do) && to_do <= user.ToDoItems.Count && index >= 0)
+                            {
+                                _toDoController.DeleteToDo(user.ID, to_do);
+                                TypeTextWithCooldown("To-do has been deleted!");
+                            }
+                            else
+                                TypeText("Well, didn't find an item with that number. Try again!");
                             break;
                         default: //If they put anything else in, just send them back to the main menu.
                             TypeTextWithCooldown("Going back to main menu...");
