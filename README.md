@@ -32,7 +32,7 @@ Ensure you have the following installed on your system:
 1️⃣ **Clone the repository**
 
 ```sh
-git clone https://github.com/yourusername/your-repo.git
+git clone https://github.com/Mehmet-Dev/to-do-app.git
 cd your-repo
 ```
 
